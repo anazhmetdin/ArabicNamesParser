@@ -45,8 +45,8 @@ name_instance = Name(fullName, allNamesNormalized)
 
 * `FullName`: "ابن علي [Ibn Ali]"
 * `OtherInfo`: ["Ibn Ali"]
-* `FullNameNormalized`: "ابن علي"
-* `ComposingNamesNormalized`: ["ابن", "علي"]
+* `FullNameNormalized`: "ابن على"
+* `ComposingNamesNormalized`: ["ابن", "على"]
 
 #### Pattern
 
