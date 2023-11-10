@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import os
 
 def normalize_arabic_name(name):
     name = name.strip()
@@ -25,11 +26,16 @@ def normalize_arabic_name(name):
     
     return name
 
+class Pattern:
+    def __init__(self, pattern, group):
+        self.pattern = pattern
+        self.group = group
+
 prePatterns = [
 ]
 
 postPatterns = [
-    NamesProcessing.Pattern(pattern=r'[\d\s]*([^\d]+$)', group=1)
+    Pattern(pattern=r'[\d\s]*([^\d]+$)', group=1)
 ]
 
 prefixes = [
@@ -39,14 +45,9 @@ prefixes = [
     "بن"
 ]
 
-class Pattern:
-    def __init__(self, pattern, group):
-        self.pattern = pattern
-        self.group = group
-        
 class Name:
-    def __init__(self, fullName, allNames, prePatterns = prePatterns, postPatterns = [],
-                 prefixes = [], normalizer = normalize_arabic_name):
+    def __init__(self, fullName, allNames, prePatterns = prePatterns, postPatterns = postPatterns,
+                 prefixes = prefixes, normalizer = normalize_arabic_name):
         self.FullName, self.OtherInfo = _find_other_info(fullName)
         self.FullNameNormalized = normalizer(self.FullName)
         self.ComposingNamesNormalized = _parse_names_from_list(
@@ -131,7 +132,8 @@ def _parse_names_from_list(fullNameNormalized, allNamesNormalized, prePatterns, 
 
 
 def get_arabic_names_df(normalizer = normalize_arabic_name):
-    dfAllNames = pd.read_csv('NamesProcessing/Sultan_Qaboos_Encyclopedia_Names.csv')
+    script_directory = os.path.dirname(os.path.abspath(__file__))
+    dfAllNames = pd.read_csv(os.path.join(script_directory, 'Sultan_Qaboos_Encyclopedia_Names.csv'))
 
     dfAllNames['Normalized_Name'] = dfAllNames.apply(lambda row: normalizer(row['Name']), axis=1)
     dfAllNames.sort_values(by='Normalized_Name', key=lambda col: col.str.len(), inplace=True, ascending=False)
