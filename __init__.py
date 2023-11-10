@@ -1,1 +1,1 @@
-from .NamesProcessing import Name, Pattern, get_arabic_names_df, normalize_arabic_name
+from .ArabicNamesParser import Name, Pattern, get_arabic_names_df, normalize_arabic_name
