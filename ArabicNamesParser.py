@@ -75,18 +75,36 @@ def _process_names_with_regex(patterns, fullNameNormalized, composingNames, inde
     return index, fullNameNormalized
 
 def _replace_name(fullNameNormalized, nameNormalized, replacement):
-    posStart = fullNameNormalized.find(nameNormalized)
-    posEnd = posStart + len(nameNormalized)
 
-    if posStart != 0:
-        nameNormalized = ' ' + nameNormalized
-        replacement = ' ' + replacement
+    locations = []
+    changing = True
+    og_nameNormalized = nameNormalized
+    og_replacement = replacement
+    
+    while changing:
+        nameNormalized = og_nameNormalized
+        replacement = og_replacement
 
-    if posEnd != len(fullNameNormalized):
-        nameNormalized += ' '
-        replacement += ' '
+        posStart = fullNameNormalized.find(nameNormalized)
+        
+        if posStart == -1 or posStart in locations:
+            changing = False
+        else:
+            locations.append(posStart)
+            
+            posEnd = posStart + len(nameNormalized)
 
-    return fullNameNormalized.replace(nameNormalized, replacement)
+            if posStart != 0:
+                nameNormalized = ' ' + nameNormalized
+                replacement = ' ' + replacement
+
+            if posEnd != len(fullNameNormalized):
+                nameNormalized += ' '
+                replacement += ' '
+                
+            fullNameNormalized = fullNameNormalized.replace(nameNormalized, replacement)
+
+    return fullNameNormalized
 
 def _find_prefix(prefixes, string, position):
     for prefix in prefixes:
