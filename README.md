@@ -22,7 +22,7 @@ This Python module, `NamesProcessing`, provides functions and classes for proces
   * Normalizes Arabic names by replacing specific characters and removing diacritics.
 * **get_arabic_names_df Function**
 
-  * The fubction relies on the [Sultan Qaboos Encyclopedia of Arabic Names](http://arabiclexicon.hawramani.com/sultan-qaboos-encyclopedia-of-arab-names/) dataset, available in the file `Sultan_Qaboos_Encyclopedia_Names.csv`.
+  * The fubction relies on the [Sultan Qaboos Encyclopedia of Arabic Names](http://arabiclexicon.hawramani.com/sultan-qaboos-encyclopedia-of-arab-names/) and [Muslim Baby Names ](http://muslimbabynames.hawramani.com/)datasets, available in the files `Sultan_Qaboos_Encyclopedia_Names.csv`, `muslimbabynames_hawramani.csv`.
 
 ## Usage
 

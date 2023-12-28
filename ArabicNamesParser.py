@@ -148,20 +148,23 @@ def _parse_names_from_list(fullNameNormalized, allNamesNormalized, prePatterns, 
     composingNamesNormalized = [composingNames.get(x, x) for x in fullNameNormalized.split(' ')]
     return composingNamesNormalized
 
-def _get_arabic_names_df():
+def _get_arabic_names_df_pickled(pickle_name):
     script_directory = os.path.dirname(os.path.abspath(__file__))
-    filePartialPath = os.path.join(script_directory, 'Sultan_Qaboos_Encyclopedia_Names')
+    filePartialPath = os.path.join(script_directory, pickle_name)
     return pd.read_pickle(filePartialPath+".pickle")
+
+def _get_arabic_names_df():
+    df1 = _get_arabic_names_df_pickled('Sultan_Qaboos_Encyclopedia_Names')
+    df2 = _get_arabic_names_df_pickled('muslimbabynames_hawramani')
+
+    dfAllNames = pd.concat([df1, df2])
+    return dfAllNames
     
 def get_arabic_names_df(normalizer = None):
-    if normalizer == None:
-        return _get_arabic_names_df()
-    else:
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        filePartialPath = os.path.join(script_directory, 'Sultan_Qaboos_Encyclopedia_Names')
-        dfAllNames = pd.read_pickle(filePartialPath+".pickle")
-
+    dfAllNames = _get_arabic_names_df()
+    
+    if normalizer != None:
         dfAllNames['Normalized_Name'] = dfAllNames.apply(lambda row: normalizer(row['Name']), axis=1)
         dfAllNames.sort_values(by='Normalized_Name', key=lambda col: col.str.len(), inplace=True, ascending=False)
         
-        return dfAllNames
+    return dfAllNames
