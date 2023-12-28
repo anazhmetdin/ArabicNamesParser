@@ -158,6 +158,7 @@ def _get_arabic_names_df():
     df2 = _get_arabic_names_df_pickled('muslimbabynames_hawramani')
 
     dfAllNames = pd.concat([df1, df2])
+    dfAllNames.sort_values(by='Normalized_Name', key=lambda col: col.str.len(), inplace=True, ascending=False)
     return dfAllNames
     
 def get_arabic_names_df(normalizer = None):
