@@ -88,37 +88,19 @@ def _process_names_with_regex(patterns, fullNameNormalized, composingNames, inde
             match = re.search(pattern.pattern, fullNameNormalized)
     return index, fullNameNormalized
 
-def _replace_name(fullNameNormalized, nameNormalized, replacement):
+def _replace_name(fullNameNormalized, nameNormalized, replacement, posStart, max_replacements):
+             
+    posEnd = posStart + len(nameNormalized)
 
-    locations = []
-    changing = True
-    og_nameNormalized = nameNormalized
-    og_replacement = replacement
-    
-    while changing:
-        nameNormalized = og_nameNormalized
-        replacement = og_replacement
+    if posStart != 0:
+        nameNormalized = ' ' + nameNormalized
+        replacement = ' ' + replacement
 
-        posStart = fullNameNormalized.find(nameNormalized)
+    if posEnd != len(fullNameNormalized):
+        nameNormalized += ' '
+        replacement += ' '
         
-        if posStart == -1 or posStart in locations:
-            changing = False
-        else:
-            locations.append(posStart)
-            
-            posEnd = posStart + len(nameNormalized)
-
-            if posStart != 0:
-                nameNormalized = ' ' + nameNormalized
-                replacement = ' ' + replacement
-
-            if posEnd != len(fullNameNormalized):
-                nameNormalized += ' '
-                replacement += ' '
-                
-            fullNameNormalized = fullNameNormalized.replace(nameNormalized, replacement)
-
-    return fullNameNormalized
+    return fullNameNormalized.replace(nameNormalized, replacement, max_replacements)
 
 def _find_prefix(prefixes, string, position):
     for prefix in prefixes:
@@ -187,7 +169,7 @@ def _parse_names_from_list(fullNameNormalized, allNamesNormalized, prePatterns, 
                 nameNormalized, posStart = _add_prefix_to_name(fullNameNormalized, nameNormalized, posStart, prefixes)
                 nameNormalized, posStart = _add_postfix_to_name(fullNameNormalized, nameNormalized, posStart, postfixes)
                 composingNames[replacement] = nameNormalized
-                fullNameNormalized = _replace_name(fullNameNormalized, nameNormalized, replacement)
+                fullNameNormalized = _replace_name(fullNameNormalized, nameNormalized, replacement, posStart, 1)
                 i += 1            
     
     i, fullNameNormalized = _replace_all_fixes(fullNameNormalized, composingNames, i, prefixes, postfixes)
