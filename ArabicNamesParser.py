@@ -110,7 +110,7 @@ def _find_prefix(prefixes, string, position):
     for prefix in prefixes:
         if position > 0:
             #check if a prefix exists before starting position and make sure prefix is a separate word
-            if string.startswith(' '+prefix if position >= len(prefix)+1 else prefix, max(0, position - len(prefix) - 2)):
+            if string.startswith(' '+prefix if position > len(prefix)+1 else prefix, max(0, position - len(prefix) - 2)):
                 return prefix
     return None
 
