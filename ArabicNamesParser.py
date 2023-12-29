@@ -1,4 +1,5 @@
 import pandas as pd
+import itertools
 import re
 import os
 
@@ -45,15 +46,28 @@ prefixes = [
     "بن"
 ]
 
+postfixes = [
+    "الله",
+    "الدين",
+    "النبي",
+    "الرسول",
+]
+
 class Name:
     def __init__(self, fullName, allNames, prePatterns = prePatterns, postPatterns = postPatterns,
-                 prefixes = prefixes, normalizer = normalize_arabic_name):
+                 prefixes = prefixes, normalizer = normalize_arabic_name, postfixes = postfixes):
+        cp_prefixes = []
+        for prefix in prefixes:
+            cp_prefixes.append(normalizer(prefix))
+        cp_postfixes = []
+        for postfix in postfixes:
+            cp_postfixes.append(normalizer(postfix))
         self.FullName, self.OtherInfo = _find_other_info(fullName)
         self.FullNameNormalized = normalizer(self.FullName)
         self.ComposingNamesNormalized = _parse_names_from_list(
                                             self.FullNameNormalized,
                                             allNames, prePatterns,
-                                            postPatterns, prefixes)
+                                            postPatterns, cp_prefixes, cp_postfixes)
     
 def _find_other_info(fullName):
     extracted_text = re.findall(r'[\[{(<]([^\[\]{}()<>]*)[\]})>]', fullName)
@@ -114,6 +128,14 @@ def _find_prefix(prefixes, string, position):
                 return prefix
     return None
 
+def _find_postfix(postfixes, string, word, position):
+    for postfix in postfixes:
+        if position > 0:
+            #check if a postfix exists after starting string and make sure postfix is a separate word
+            if string.startswith(word + ' ' + postfix + ' ', position) or string.endswith(word + ' ' + postfix):
+                return postfix
+    return None
+
 def _add_prefix_to_name(fullNameNormalized, nameNormalized, posStart, prefixes):
     prefix = _find_prefix(prefixes, fullNameNormalized, posStart)
     if prefix:
@@ -121,31 +143,52 @@ def _add_prefix_to_name(fullNameNormalized, nameNormalized, posStart, prefixes):
         posStart -= len(prefix) + 1
     return nameNormalized, posStart
 
-def _replace_all_prefixes(fullNameNormalized, composingNames, index, prefixes):
+def _add_postfix_to_name(fullNameNormalized, nameNormalized, posStart, postfixes):
+    postfix = _find_postfix(postfixes, fullNameNormalized, nameNormalized, posStart)
+    if postfix:
+        nameNormalized = f"{nameNormalized} {postfix}"
+    return nameNormalized, posStart
+
+def _replace_all_fixes(fullNameNormalized, composingNames, index, prefixes, postfixes):
     patterns = []
+    for prefix, postfix in itertools.product(postfixes, prefixes):
+        pattern = f'({re.escape(prefix)}\s[^\d\s]+\s{re.escape(postfix)})'
+        group = 1
+        patterns.append(Pattern(pattern=pattern, group=group))
+    
     for prefix in prefixes:
         pattern = f'({re.escape(prefix)}\s[^\d\s]+)'
+        group = 1
+        patterns.append(Pattern(pattern=pattern, group=group))
+    
+    for posfix in postfixes:
+        pattern = f'([^\d\s]+\s{re.escape(posfix)})'
         group = 1
         patterns.append(Pattern(pattern=pattern, group=group))
         
     return _process_names_with_regex(patterns, fullNameNormalized, composingNames, index)
 
-def _parse_names_from_list(fullNameNormalized, allNamesNormalized, prePatterns, postPatterns, prefixes):
+def _parse_names_from_list(fullNameNormalized, allNamesNormalized, prePatterns, postPatterns, prefixes, postfixes=[]):
     composingNames = dict()  
     i, fullNameNormalized = _process_names_with_regex(prePatterns, fullNameNormalized, composingNames, 0)
 
     allNamesNormalized.sort(key=len, reverse=True)
 
     for nameNormalized in allNamesNormalized:
-        posStart = fullNameNormalized.find(nameNormalized)
-        if posStart != -1:
-            replacement = str(i)
-            nameNormalized, posStart = _add_prefix_to_name(fullNameNormalized, nameNormalized, posStart, prefixes)
-            composingNames[replacement] = nameNormalized
-            fullNameNormalized = _replace_name(fullNameNormalized, nameNormalized, replacement)
-            i += 1
+        og_nameNormalized = nameNormalized
+        posStart = 0
+        while posStart != -1:
+            nameNormalized = og_nameNormalized
+            posStart = fullNameNormalized.find(nameNormalized)
+            if posStart != -1:
+                replacement = str(i)
+                nameNormalized, posStart = _add_prefix_to_name(fullNameNormalized, nameNormalized, posStart, prefixes)
+                nameNormalized, posStart = _add_postfix_to_name(fullNameNormalized, nameNormalized, posStart, postfixes)
+                composingNames[replacement] = nameNormalized
+                fullNameNormalized = _replace_name(fullNameNormalized, nameNormalized, replacement)
+                i += 1            
     
-    i, fullNameNormalized = _replace_all_prefixes(fullNameNormalized, composingNames, i, prefixes)
+    i, fullNameNormalized = _replace_all_fixes(fullNameNormalized, composingNames, i, prefixes, postfixes)
     i, fullNameNormalized = _process_names_with_regex(postPatterns, fullNameNormalized, composingNames, i)
     composingNamesNormalized = [composingNames.get(x, x) for x in fullNameNormalized.split(' ')]
     return composingNamesNormalized
