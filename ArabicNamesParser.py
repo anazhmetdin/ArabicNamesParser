@@ -36,7 +36,7 @@ prePatterns = [
 ]
 
 postPatterns = [
-    Pattern(pattern=r'[\d\s]*([^\d]+$)', group=1)
+    # Pattern(pattern=r'[\d\s]*([^\d]+$)', group=1)
 ]
 
 prefixes = [
@@ -203,8 +203,9 @@ def _get_arabic_names_df_pickled(pickle_name):
 def _get_arabic_names_df():
     df1 = _get_arabic_names_df_pickled('Sultan_Qaboos_Encyclopedia_Names')
     df2 = _get_arabic_names_df_pickled('muslimbabynames_hawramani')
+    df3 = _get_arabic_names_df_pickled('additional_names')
 
-    dfAllNames = pd.concat([df1, df2])
+    dfAllNames = pd.concat([df1, df2, df3])
     dfAllNames.sort_values(by='Normalized_Name', key=lambda col: col.str.len(), inplace=True, ascending=False)
     return dfAllNames
     
