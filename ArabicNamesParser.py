@@ -134,17 +134,17 @@ def _add_postfix_to_name(fullNameNormalized, nameNormalized, posStart, postfixes
 def _replace_all_fixes(fullNameNormalized, composingNames, index, prefixes, postfixes):
     patterns = []
     for prefix, postfix in itertools.product(postfixes, prefixes):
-        pattern = f'({re.escape(prefix)}\s[^\d\s]+\s{re.escape(postfix)})'
+        pattern = f'\b({re.escape(prefix)}\s[^\d\s]+\s{re.escape(postfix)})\b'
         group = 1
         patterns.append(Pattern(pattern=pattern, group=group))
     
     for prefix in prefixes:
-        pattern = f'({re.escape(prefix)}\s[^\d\s]+)'
+        pattern = f'\b({re.escape(prefix)}\s[^\d\s]+)'
         group = 1
         patterns.append(Pattern(pattern=pattern, group=group))
     
     for posfix in postfixes:
-        pattern = f'([^\d\s]+\s{re.escape(posfix)})'
+        pattern = f'([^\d\s]+\s{re.escape(posfix)})\b'
         group = 1
         patterns.append(Pattern(pattern=pattern, group=group))
         
