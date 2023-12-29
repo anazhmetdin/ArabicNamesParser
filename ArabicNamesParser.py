@@ -48,8 +48,8 @@ prefixes = [
 
 postfixes = [
     "الله",
-    "الدين",
-    "النبي",
+    "الدىن",
+    "النبى",
     "الرسول",
 ]
 
@@ -176,9 +176,11 @@ def _parse_names_from_list(fullNameNormalized, allNamesNormalized, prePatterns, 
 
     for nameNormalized in allNamesNormalized:
         og_nameNormalized = nameNormalized
+        og_fullNameNormalized = ''
         posStart = 0
-        while posStart != -1:
+        while posStart != -1 and og_fullNameNormalized != fullNameNormalized:
             nameNormalized = og_nameNormalized
+            og_fullNameNormalized = fullNameNormalized
             posStart = fullNameNormalized.find(nameNormalized)
             if posStart != -1:
                 replacement = str(i)
