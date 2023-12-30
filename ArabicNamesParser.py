@@ -112,10 +112,9 @@ def _find_prefix(prefixes, string, position):
 
 def _find_postfix(postfixes, string, word, position):
     for postfix in postfixes:
-        if position > 0:
-            #check if a postfix exists after starting string and make sure postfix is a separate word
-            if string.startswith(word + ' ' + postfix + ' ', position) or string.endswith(word + ' ' + postfix):
-                return postfix
+        #check if a postfix exists after starting string and make sure postfix is a separate word
+        if string.startswith(word + ' ' + postfix + ' ', position) or string.endswith(word + ' ' + postfix):
+            return postfix
     return None
 
 def _add_prefix_to_name(fullNameNormalized, nameNormalized, posStart, prefixes):
@@ -171,7 +170,6 @@ def _parse_names_from_list(fullNameNormalized, allNamesNormalized, prePatterns, 
                 composingNames[replacement] = nameNormalized
                 fullNameNormalized = _replace_name(fullNameNormalized, nameNormalized, replacement, posStart, 1)
                 i += 1            
-    
     i, fullNameNormalized = _replace_all_fixes(fullNameNormalized, composingNames, i, prefixes, postfixes)
     i, fullNameNormalized = _process_names_with_regex(postPatterns, fullNameNormalized, composingNames, i)
     composingNamesNormalized = [composingNames.get(x, x) for x in fullNameNormalized.split(' ')]
